@@ -141,4 +141,4 @@ The tests are smoke and invariant tests (simulation reproducibility, payoff/basi
 
 Yuchao Dong (2023), “Randomized Optimal Stopping Problem in Continuous Time and Reinforcement Learning Algorithm,” arXiv:2208.02409v3: https://arxiv.org/abs/2208.02409.
 
-Original student project: Aymen Ben Ammar and Mohamed Rejili. Numerical refactoring and documentation build on the cited paper.
+Project author: Mohamed Rejili. This repository presents a numerical implementation based on the cited paper.
