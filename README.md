@@ -20,30 +20,30 @@ An American put gives its holder the right, but not the obligation, to sell an a
 
 Let:
 
-- \`S_t\` be the underlying asset price at time \`t\`;
-- \`K\` be the strike price;
-- \`r\` be the constant risk-free interest rate;
-- \`sigma\` be the volatility;
-- \`T\` be the maturity.
+- `S_t` be the underlying asset price at time `t`;
+- `K` be the strike price;
+- `r` be the constant risk-free interest rate;
+- `sigma` be the volatility;
+- `T` be the maturity.
 
 Under the risk-neutral Black–Scholes model, the asset follows a geometric Brownian motion:
 
-\`\`\`text
+```text
 dS_t = r S_t dt + sigma S_t dW_t
-\`\`\`
+```
 
-Here, \`W_t\` is a standard Brownian motion. The holder's immediate exercise payoff is:
+Here, `W_t` is a standard Brownian motion. The holder's immediate exercise payoff is:
 
-\`\`\`text
+```text
 g(S) = max(K - S, 0)
-\`\`\`
+```
 
 The classical optimal stopping problem asks for the exercise time that maximizes the expected discounted payoff. In simplified notation:
 
-\`\`\`text
+```text
 V_classical(S,t) = sup over stopping times tau in [t,T]
                    E[ exp(-r (tau-t)) g(S_tau) | S_t = S ]
-\`\`\`
+```
 
 The central difficulty is that the decision to exercise depends on the current asset price, the remaining time, and the expected future value of continuing to hold the option.
 
@@ -51,19 +51,19 @@ The central difficulty is that the decision to exercise depends on the current a
 
 In a classical stopping strategy, exercise is described by a stopping time: the option is either exercised or kept alive.
 
-The randomized formulation replaces this all-or-nothing decision by a non-negative **stopping intensity** \`pi_t\`. Informally, the intensity controls the instantaneous rate at which the option is stopped.
+The randomized formulation replaces this all-or-nothing decision by a non-negative **stopping intensity** `pi_t`. Informally, the intensity controls the instantaneous rate at which the option is stopped.
 
 - A low intensity means that the policy tends to continue.
 - A high intensity means that the policy tends to stop more quickly.
 - The intensity is allowed to depend on the current state and time.
 
-Let \`p_t\` denote the probability that the option has not yet been stopped. Its continuous-time survival equation is:
+Let `p_t` denote the probability that the option has not yet been stopped. Its continuous-time survival equation is:
 
-\`\`\`text
+```text
 dp_t = -pi_t p_t dt
-\`\`\`
+```
 
-Over a short time interval \`dt\`, the probability mass assigned to stopping is approximately \`p_t pi_t dt\`, while the remaining survival mass is approximately \`p_t (1 - pi_t dt)\`.
+Over a short time interval `dt`, the probability mass assigned to stopping is approximately `p_t pi_t dt`, while the remaining survival mass is approximately `p_t (1 - pi_t dt)`.
 
 Randomization makes the control smoother than a strict exercise/continue decision. It also creates a continuous control variable, the intensity, which can be optimized.
 
@@ -71,11 +71,11 @@ Randomization makes the control smoother than a strict exercise/continue decisio
 
 The randomized problem in the reference paper uses the regularization function:
 
-\`\`\`text
+```text
 R(pi) = pi - pi log(pi),       pi > 0
-\`\`\`
+```
 
-The positive parameter \`lambda\` (also called temperature) controls the strength of the regularization.
+The positive parameter `lambda` (also called temperature) controls the strength of the regularization.
 
 The regularizer changes the optimization problem: the controller is not maximizing only the expected exercise payoff. It also receives the regularization contribution associated with the stopping intensity.
 
@@ -91,58 +91,58 @@ The numerical value at positive temperature must therefore be interpreted as an 
 
 ### 2.1 The HJB equation
 
-Write \`V(S,t)\` for the exploratory value function after using the homogeneous representation with respect to the survival probability.
+Write `V(S,t)` for the exploratory value function after using the homogeneous representation with respect to the survival probability.
 
 The risk-neutral Black–Scholes generator, acting on a function of the asset price, is:
 
-\`\`\`text
+```text
 L f(S) = r S f_S(S) + 0.5 sigma^2 S^2 f_SS(S) - r f(S)
-\`\`\`
+```
 
 The randomized stopping HJB equation is:
 
-\`\`\`text
+```text
 V_t + L V
     + sup_{pi >= 0} { (g(S) - V) pi + lambda R(pi) } = 0
 
 V(S,T) = g(S)
-\`\`\`
+```
 
-The term \`g(S) - V(S,t)\` compares immediate exercise with continuation:
+The term `g(S) - V(S,t)` compares immediate exercise with continuation:
 
 - If immediate exercise is attractive relative to continuation, the optimal intensity increases.
 - If continuation is more attractive, the optimal intensity decreases.
 
 Substituting the entropy regularizer gives the Hamiltonian:
 
-\`\`\`text
+```text
 H(V,pi) = (g - V) pi + lambda (pi - pi log(pi))
-\`\`\`
+```
 
-Differentiating with respect to \`pi\` gives the first-order condition:
+Differentiating with respect to `pi` gives the first-order condition:
 
-\`\`\`text
+```text
 dH/dpi = g - V - lambda log(pi) = 0
-\`\`\`
+```
 
 Consequently, the optimal intensity is:
 
-\`\`\`text
+```text
 pi*(S,t) = exp( (g(S) - V(S,t)) / lambda )
-\`\`\`
+```
 
 At this intensity, the optimized Hamiltonian is:
 
-\`\`\`text
+```text
 sup H(V,pi) = lambda exp( (g(S) - V(S,t)) / lambda )
-\`\`\`
+```
 
 The nonlinear HJB equation can therefore be written as:
 
-\`\`\`text
+```text
 V_t + L V + lambda exp((g - V)/lambda) = 0
 V(S,T) = g(S)
-\`\`\`
+```
 
 These equations are deliberately written as plain text in code blocks. This avoids dependence on GitHub's mathematical rendering and keeps every symbol readable in the repository.
 
@@ -150,23 +150,23 @@ These equations are deliberately written as plain text in code blocks. This avoi
 
 The finite-difference solver works with the log-price variable:
 
-\`\`\`text
+```text
 x = log(S)
 mu = r - 0.5 sigma^2
-\`\`\`
+```
 
 In these coordinates, the differential operator becomes:
 
-\`\`\`text
+```text
 L V = mu V_x + 0.5 sigma^2 V_xx - r V
-\`\`\`
+```
 
 This transformation is useful because the log of a geometric Brownian motion has constant drift and volatility. It also makes it natural to construct a uniform spatial grid in log-price rather than in asset price.
 
 ## 3. Method 1 — Finite differences for the exploratory HJB equation
 
-**Implementation:** \`src/finite_difference.py\`  
-**Main function:** \`solve_exploratory_put(...)\`
+**Implementation:** `src/finite_difference.py`  
+**Main function:** `solve_exploratory_put(...)`
 
 ### 3.1 Objective
 
@@ -178,22 +178,22 @@ Unlike Monte Carlo methods, it does not estimate the value by averaging simulate
 
 The solver constructs a uniform grid in log-price:
 
-\`\`\`text
+```text
 x_i = x_min + i * dx
-\`\`\`
+```
 
 and a uniform time grid:
 
-\`\`\`text
+```text
 t_n = n * dt
 dt = T / number_of_time_steps
-\`\`\`
+```
 
 The terminal condition is known exactly:
 
-\`\`\`text
+```text
 V(S,T) = max(K-S, 0)
-\`\`\`
+```
 
 The algorithm starts from this terminal payoff and moves backward in time to obtain the value at time zero.
 
@@ -201,7 +201,7 @@ The spatial derivatives are approximated by finite differences:
 
 - The second derivative is approximated by a centered difference.
 - The drift derivative is approximated with an upwind difference. The direction is selected according to the sign of the log-price drift.
-- The discounting term \`-r V\` is included in the discrete operator.
+- The discounting term `-r V` is included in the discrete operator.
 
 The upwind treatment of the drift is chosen to improve numerical stability and preserve the monotonicity properties expected from this type of discretization.
 
@@ -209,17 +209,17 @@ The upwind treatment of the drift is chosen to improve numerical stability and p
 
 At each time step, the solver must handle the nonlinear term:
 
-\`\`\`text
+```text
 lambda * exp((g - V)/lambda)
-\`\`\`
+```
 
 It uses an implicit time discretization and a policy/Newton-style iteration.
 
-Given a current guess \`V_guess\`, it computes the associated intensity:
+Given a current guess `V_guess`, it computes the associated intensity:
 
-\`\`\`text
+```text
 pi_guess = exp((g - V_guess)/lambda)
-\`\`\`
+```
 
 The exponential term is linearized around the current guess. This produces a sparse linear system for the updated value. The process is repeated until the relative change in the value function is smaller than the prescribed tolerance, or until the maximum number of iterations is reached.
 
@@ -253,8 +253,8 @@ This method is particularly useful for visualizing the value function and studyi
 
 ## 4. Method 2 — Longstaff–Schwartz least-squares Monte Carlo
 
-**Implementation:** \`src/longstaff_schwartz.py\`  
-**Main function:** \`longstaff_schwartz_put(...)\`
+**Implementation:** `src/longstaff_schwartz.py`  
+**Main function:** `longstaff_schwartz_put(...)`
 
 ### 4.1 Objective
 
@@ -268,14 +268,14 @@ This method solves a different numerical problem from the positive-temperature e
 
 The algorithm first simulates many risk-neutral paths of the underlying asset.
 
-For a time step \`dt\`, the exact geometric Brownian motion transition is:
+For a time step `dt`, the exact geometric Brownian motion transition is:
 
-\`\`\`text
+```text
 S_(t+dt) = S_t * exp(
     (r - 0.5 sigma^2) dt + sigma sqrt(dt) Z
 )
 Z ~ Normal(0,1)
-\`\`\`
+```
 
 Using this exact transition avoids introducing an Euler discretization error into the GBM simulation at the exercise dates.
 
@@ -285,9 +285,9 @@ Each simulated path represents one possible evolution of the underlying asset un
 
 At maturity, the value is the terminal put payoff:
 
-\`\`\`text
+```text
 payoff = max(K - S_T, 0)
-\`\`\`
+```
 
 The algorithm then works backward through the exercise dates.
 
@@ -297,24 +297,24 @@ The conditional expectation is not known explicitly. LSM approximates it by a re
 
 The current implementation uses a polynomial basis in moneyness:
 
-\`\`\`text
+```text
 x = S / K
 
 basis(x) = [1, x, x^2, ..., x^degree]
-\`\`\`
+```
 
-The regression coefficients are estimated by ordinary least squares. The code uses \`numpy.linalg.lstsq\`, rather than explicitly inverting a matrix, which is generally more numerically robust.
+The regression coefficients are estimated by ordinary least squares. The code uses `numpy.linalg.lstsq`, rather than explicitly inverting a matrix, which is generally more numerically robust.
 
 ### 4.4 Exercise decision
 
 Once the continuation estimate has been computed, the algorithm compares it with immediate exercise:
 
-\`\`\`text
+```text
 if immediate_payoff >= estimated_continuation:
     exercise
 else:
     continue
-\`\`\`
+```
 
 If exercise is selected, the path's cash flow and stopping date are updated. Otherwise, the previously determined future cash flow is retained.
 
@@ -335,8 +335,8 @@ LSM is sensitive to the number of paths, the number of exercise dates, and the r
 
 ## 5. Method 3 — Neural fitted policy iteration
 
-**Implementation:** \`src/reinforcement_learning.py\`  
-**Main functions:** \`train_policy_iteration(...)\` and \`evaluate_policy(...)\`  
+**Implementation:** `src/reinforcement_learning.py`  
+**Main functions:** `train_policy_iteration(...)` and `evaluate_policy(...)`  
 **Dependency:** PyTorch (optional)
 
 ### 5.1 Objective
@@ -353,15 +353,15 @@ A separate neural network is created for each time step.
 
 The network receives three normalized inputs:
 
-- the asset price divided by the strike, \`S/K\`;
-- the immediate payoff divided by the strike, \`g(S)/K\`;
+- the asset price divided by the strike, `S/K`;
+- the immediate payoff divided by the strike, `g(S)/K`;
 - the normalized time coordinate.
 
 The network predicts a correction to the immediate payoff. Its output is rescaled by the strike to obtain the approximate value:
 
-\`\`\`text
+```text
 V_theta(S,t) = K * NN_theta(S/K, g(S)/K, t/T)
-\`\`\`
+```
 
 This parameterization provides a useful payoff-based baseline while allowing the network to learn the difference between immediate exercise and the exploratory value.
 
@@ -374,9 +374,9 @@ At each time step:
 1. The network estimates the current value from the current simulated states.
 2. The optimal-intensity formula is applied to this estimated value:
 
-\`\`\`text
+```text
 pi = exp((g - V_theta)/lambda)
-\`\`\`
+```
 
 3. The intensity is used to form a one-step target consisting of:
    - the immediate exercise reward weighted by the stopping intensity;
@@ -387,12 +387,12 @@ pi = exp((g - V_theta)/lambda)
 
 In the discrete implementation, the one-step target has the form:
 
-\`\`\`text
+```text
 target =
     g * pi * dt
     + lambda * (pi - pi log(pi)) * dt
     + exp(-r dt) * V_next * (1 - pi dt)
-\`\`\`
+```
 
 This is a time-discretized approximation of the continuous-time reward and survival relation. The network parameters are optimized with Adam, and gradient clipping is used to limit excessively large updates.
 
@@ -402,21 +402,21 @@ The continuous-time intensity is non-negative and has no fixed upper bound.
 
 However, the discrete survival approximation used in this implementation is:
 
-\`\`\`text
+```text
 survival_next = survival_now * (1 - pi * dt)
-\`\`\`
+```
 
 To prevent a negative survival factor, the implementation caps the intensity so that:
 
-\`\`\`text
+```text
 0 < pi * dt < 1
-\`\`\`
+```
 
 This cap is a numerical safeguard for the chosen discrete update. It is not part of the unconstrained continuous-time optimal-intensity formula. Its effect should be assessed when changing the time step or temperature.
 
 ### 5.5 Independent policy evaluation
 
-After training, \`evaluate_policy(...)\` generates a new set of GBM paths using a separate random seed.
+After training, `evaluate_policy(...)` generates a new set of GBM paths using a separate random seed.
 
 For each path, it applies the learned intensity, accumulates the discounted randomized exercise and regularization rewards, updates the survival probability, and adds the discounted terminal payoff of the paths that survive to maturity.
 
@@ -456,7 +456,7 @@ A meaningful numerical comparison should therefore be organized as follows:
 
 ## 7. Repository structure
 
-\`\`\`text
+```text
 .
 ├── README.md
 ├── projet_RL.ipynb
@@ -470,20 +470,20 @@ A meaningful numerical comparison should therefore be organized as follows:
 │   └── reinforcement_learning.py
 └── tests/
     └── test_numerics.py
-\`\`\`
+```
 
-- \`src/simulation.py\`: risk-neutral GBM simulation and put payoff.
-- \`src/finite_difference.py\`: finite-difference HJB solver.
-- \`src/longstaff_schwartz.py\`: least-squares Monte Carlo.
-- \`src/reinforcement_learning.py\`: neural fitted policy iteration and evaluation.
-- \`projet_RL.ipynb\`: notebook demonstrating the methods.
-- \`tests/test_numerics.py\`: smoke tests and basic numerical invariants.
+- `src/simulation.py`: risk-neutral GBM simulation and put payoff.
+- `src/finite_difference.py`: finite-difference HJB solver.
+- `src/longstaff_schwartz.py`: least-squares Monte Carlo.
+- `src/reinforcement_learning.py`: neural fitted policy iteration and evaluation.
+- `projet_RL.ipynb`: notebook demonstrating the methods.
+- `tests/test_numerics.py`: smoke tests and basic numerical invariants.
 
 ## 8. Installation
 
 Python 3.10 or newer is recommended.
 
-\`\`\`bash
+```bash
 git clone https://github.com/med-rjili/randomized-optimal-stopping-rl.git
 cd randomized-optimal-stopping-rl
 
@@ -497,19 +497,19 @@ source .venv/bin/activate
 
 python -m pip install --upgrade pip
 pip install -e ".[dev,rl]"
-\`\`\`
+```
 
-The \`rl\` extra installs PyTorch for the neural method. To install only the core numerical dependencies and development tools, use:
+The `rl` extra installs PyTorch for the neural method. To install only the core numerical dependencies and development tools, use:
 
-\`\`\`bash
+```bash
 pip install -e ".[dev]"
-\`\`\`
+```
 
 ## 9. Quick start
 
 ### Finite differences
 
-\`\`\`python
+```python
 from src.finite_difference import solve_exploratory_put
 
 result = solve_exploratory_put(
@@ -524,11 +524,11 @@ result = solve_exploratory_put(
 )
 
 print("Exploratory value:", result["price"])
-\`\`\`
+```
 
 ### Longstaff–Schwartz
 
-\`\`\`python
+```python
 from src.longstaff_schwartz import longstaff_schwartz_put
 
 result = longstaff_schwartz_put(
@@ -544,11 +544,11 @@ result = longstaff_schwartz_put(
 
 print("Bermudan estimate:", result["price"])
 print("95% interval:", result["confidence_interval_95"])
-\`\`\`
+```
 
 ### Neural policy iteration
 
-\`\`\`python
+```python
 from src.reinforcement_learning import (
     train_policy_iteration,
     evaluate_policy,
@@ -580,15 +580,15 @@ evaluation = evaluate_policy(
 )
 
 print(evaluation)
-\`\`\`
+```
 
 ## 10. Tests
 
 Run the test suite from the repository root:
 
-\`\`\`bash
+```bash
 pytest -q
-\`\`\`
+```
 
 The tests check reproducibility and shape of GBM simulation, payoff and basis construction, and basic finite numerical outputs from the Longstaff–Schwartz and finite-difference routines.
 
