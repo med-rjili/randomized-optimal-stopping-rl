@@ -11,30 +11,30 @@ A reproducible numerical companion project for Yuchao Dong's paper, *Randomized 
 ## Mathematical model
 
 Under the risk-neutral measure,
-$
+$$
  dS_t = rS_t\,dt + \sigma S_t\,dW_t, \qquad g(S)=(K-S)^+.
-$
+$$
 
 A randomized stopping policy is represented by an intensity $\pi_t\geq 0$, with survival probability satisfying $dp_t=-\pi_t p_t\,dt$. The regularizer is
-$
+$$
  R(\pi)=\pi-\pi\log\pi, \qquad \lambda>0.
-$
+$$
 
 Writing the value in homogeneous form as $V(S,p,t)=pV(S,t)$, the HJB equation is
-$
+$$
  \partial_t V + \mathcal L V + \sup_{\pi\geq0}\{(g-V)\pi+\lambda R(\pi)\}=0,
  \qquad V(S,T)=g(S),
-$
+$$
 where, in log-price coordinates $x=\log S$,
-$
+$$
  \mathcal L=(r-\tfrac12\sigma^2)\partial_x
  +\tfrac12\sigma^2\partial_{xx}-r.
-$
+$$
 
 The first-order condition gives the **optimal randomized stopping intensity**
-$
+$$
  \boxed{\pi^*(S,t)=\exp\!\left(\frac{g(S)-V(S,t)}{\lambda}\right)}.
-$
+$$
 This sign follows by differentiating the Hamiltonian with respect to $\pi$.
 
 ## Repository layout
